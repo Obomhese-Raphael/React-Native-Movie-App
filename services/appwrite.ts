@@ -14,6 +14,7 @@ const DATABASE_ID = process.env.EXPO_PUBLIC_APPWRITE_DATABASE_ID!;
 const COLLECTION_ID = process.env.EXPO_PUBLIC_APPWRITE_COLLECTION_ID!;
 const ENDPOINT = process.env.EXPO_PUBLIC_APPWRITE_ENDPOINT!;
 const USERS_COLLECTION_ID = process.env.EXPO_PUBLIC_APPWRITE_USERS_COLLECTION_ID!;
+const SAVED_MOVIES_COLLECTION_ID = process.env.EXPO_PUBLIC_APPWRITE_SAVED_MOVIES_COLLECTION_ID!;
 
 const client = new Client()
     .setEndpoint(ENDPOINT) // Your Appwrite Endpoint
@@ -80,3 +81,77 @@ export const getTrendingMovies = async (): Promise<TrendingMovie[] | undefined> 
         return undefined;
     }
 }
+
+export const checkIfSaved = async (movieId: string, userId: string) => {
+    try {
+        const response = await database.listDocuments(DATABASE_ID, USERS_COLLECTION_ID, [
+            Query.equal('userId', userId),
+            Query.equal('movieId', movieId),
+        ]);
+        if (response.documents.length > 0) {
+            return {
+                isSaved: true,
+                savedMovieId: response.documents[0].$id,
+                savedMovieData: JSON.parse(response.documents[0].movieData),
+            }
+        } else {
+            return {
+                isSaved: false,
+                savedMovieId: null,
+                savedMovieData: null,
+            }
+        }
+    } catch (error) {
+        console.log('Error checking if movie is saved:', error);
+        return {
+            isSaved: false,
+            savedMovieId: null,
+            savedMovieData: null,
+        }
+    }
+}
+
+export const saveMovie = async (userId: string, movieId: string, movieData: any) => {
+    try {
+        const document = await database.createDocument(
+            DATABASE_ID,
+            SAVED_MOVIES_COLLECTION_ID,
+            ID.unique(),
+            {
+                userId: userId,
+                movieId: movieId,
+                movieData: JSON.stringify(movieData),
+            }
+        );
+        return document.$id;
+    } catch (error) {
+        console.error('Error saving movie:', error);
+        return null;
+    }
+};
+
+export const removeSavedMovie = async (savedMovieId: string) => {
+    try {
+        await database.deleteDocument(DATABASE_ID, SAVED_MOVIES_COLLECTION_ID, savedMovieId);
+        return true;
+    } catch (error) {
+        console.error('Error removing saved movie:', error);
+        return false;
+    }
+}
+
+export const fetchSavedMovies = async (userId: string) => {
+    try {
+        const response = await database.listDocuments(
+            DATABASE_ID,
+            SAVED_MOVIES_COLLECTION_ID,
+            [
+                Query.equal('userId', userId)
+            ]
+        );
+        return response.documents;
+    } catch (error) {
+        console.error('Error fetching saved movies:', error);
+        return [];
+    }
+};

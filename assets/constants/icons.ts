@@ -9,6 +9,10 @@ import arrow from "@/assets/icons/arrow.png";
 import settings from "@/assets/icons/settings.png";
 import signOut from "@/assets/icons/sign-out.png";
 import edit from "@/assets/icons/edit.webp";
+import heart from "@/assets/icons/heart_filled.png";
+import heartEmpty from "@/assets/icons/heart_empty.png";
+import close from "@/assets/icons/close.png";
+
 
 export const icons = {
   home,
@@ -21,5 +25,8 @@ export const icons = {
   person,
   settings,
   signOut,
-  edit
+  edit,
+  heart,
+  heartEmpty,
+  close
 };

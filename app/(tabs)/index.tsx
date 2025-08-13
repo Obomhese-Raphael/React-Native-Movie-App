@@ -30,7 +30,7 @@ export default function Index() {
       <Image source={images.bg} className="absolute w-full z-0" />
       <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false} contentContainerStyle={{ minHeight: "100%", paddingBottom: 10 }}>
         {/* User Button from clerk */}
-        <View className="flex-row items-center justify-between mt-5">
+        <View className="flex-row items-center justify-between mt-20">
           <Text className="text-lg text-white font-bold">Welcome 👋, {" "}{user?.firstName || "User"}</Text>
           <TouchableOpacity onPress={() => router.push("/profile")}>
             <Image
