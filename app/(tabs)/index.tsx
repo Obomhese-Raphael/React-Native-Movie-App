@@ -6,10 +6,12 @@ import TrendingCard from "@/components/TrendingCard";
 import { fetchMovies } from "@/services/api";
 import { getTrendingMovies } from "@/services/appwrite";
 import useFetch from "@/services/useFetch";
+import { useUser } from "@clerk/clerk-expo";
 import { useRouter } from "expo-router";
-import { ActivityIndicator, FlatList, Image, ScrollView, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, Image, ScrollView, Text, TouchableOpacity, View } from "react-native";
 
 export default function Index() {
+  const { user } = useUser();
   const router = useRouter();
   const {
     data: trendingMovies,
@@ -27,7 +29,17 @@ export default function Index() {
     <View className="flex-1 bg-primary">
       <Image source={images.bg} className="absolute w-full z-0" />
       <ScrollView className="flex-1 px-5" showsVerticalScrollIndicator={false} contentContainerStyle={{ minHeight: "100%", paddingBottom: 10 }}>
-        <Image source={icons.logo} className="w-12 h-10 mt-20 mb-5 mx-auto" />
+        {/* User Button from clerk */}
+        <View className="flex-row items-center justify-between mt-5">
+          <Text className="text-lg text-white font-bold">Welcome 👋, {" "}{user?.firstName || "User"}</Text>
+          <TouchableOpacity onPress={() => router.push("/profile")}>
+            <Image
+              source={user?.imageUrl ? { uri: user.imageUrl } : icons.person}
+              className="w-10 h-10 rounded-full"
+            />
+          </TouchableOpacity>
+        </View>
+        <Image source={icons.logo} className="w-12 h-10 mt-10 mb-5 mx-auto" />
         {moviesLoading || trendingLoading ? (
           <ActivityIndicator size={'large'} color={'#0000ff'} className="mt-10 self-center" />
         ) : moviesError || trendingError ? (

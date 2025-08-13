@@ -6,6 +6,9 @@ import save from "@/assets/icons/save.png";
 import star from "@/assets/icons/star.png";
 import play from "@/assets/icons/play.png";
 import arrow from "@/assets/icons/arrow.png";
+import settings from "@/assets/icons/settings.png";
+import signOut from "@/assets/icons/sign-out.png";
+import edit from "@/assets/icons/edit.webp";
 
 export const icons = {
   home,
@@ -16,4 +19,7 @@ export const icons = {
   play,
   arrow,
   person,
+  settings,
+  signOut,
+  edit
 };
