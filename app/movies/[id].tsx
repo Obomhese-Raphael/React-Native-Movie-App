@@ -7,6 +7,8 @@ import useFetch from '@/services/useFetch';
 import { fetchMovieDetails } from '@/services/api';
 import { icons } from '@/assets/constants/icons';
 import { checkIfSaved, removeSavedMovie, saveMovie } from '@/services/appwrite';
+import * as Notifications from 'expo-notifications';
+
 
 interface MovieInfoProps {
   label?: string;
@@ -31,12 +33,13 @@ const MovieDetails = () => {
 
   const [isFavorite, setIsFavorite] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
   const [savedMovieId, setSavedMovieId] = useState(null);
 
   // Function to check if the movie is already saved by the user
   const getSavedStatus = async () => {
     if (!user || !id) return;
-    // Use the checkIfSaved function from appwrite.ts
+    // Note: userId first, then movieId
     const { isSaved, savedMovieId: appwriteDocId } = await checkIfSaved(user.id, id);
     setIsFavorite(isSaved);
     setSavedMovieId(appwriteDocId);
@@ -52,21 +55,35 @@ const MovieDetails = () => {
 
     setIsSaving(true);
     try {
+      // If already saved, show notification and do nothing
+      if (isFavorite && isSaved) {
+        await Notifications.scheduleNotificationAsync({
+          content: {
+            title: 'Already Saved',
+            body: 'Movie already saved to lists',
+          },
+          trigger: null,
+        });
+        return;
+      }
+
+      // Remove from saved list
       if (isFavorite) {
-        // Remove the movie from saved list
         if (savedMovieId) {
           const success = await removeSavedMovie(savedMovieId);
           if (success) {
             setIsFavorite(false);
+            setIsSaved(false);
             setSavedMovieId(null);
             Alert.alert('Removed', `${movie.title} has been removed from your list.`);
           }
         }
       } else {
-        // Add the movie to the saved list
+        // Add to saved list
         const newDocId = await saveMovie(user.id, id, movie);
         if (newDocId) {
           setIsFavorite(true);
+          setIsSaved(true);
           setSavedMovieId(newDocId);
           Alert.alert('Saved', `${movie.title} has been added to your list!`);
         }
@@ -112,7 +129,7 @@ const MovieDetails = () => {
               <ActivityIndicator size="small" color="#000" />
             ) : (
               <Image
-                source={isFavorite ? icons.heart : icons.heartEmpty}
+                source={isFavorite && isSaved ? icons.heart : icons.heartEmpty}
                 className="w-6 h-6"
                 resizeMode="contain"
               />

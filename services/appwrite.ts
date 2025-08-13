@@ -84,7 +84,7 @@ export const getTrendingMovies = async (): Promise<TrendingMovie[] | undefined> 
 
 export const checkIfSaved = async (movieId: string, userId: string) => {
     try {
-        const response = await database.listDocuments(DATABASE_ID, USERS_COLLECTION_ID, [
+        const response = await database.listDocuments(DATABASE_ID, SAVED_MOVIES_COLLECTION_ID, [
             Query.equal('userId', userId),
             Query.equal('movieId', movieId),
         ]);
@@ -113,6 +113,13 @@ export const checkIfSaved = async (movieId: string, userId: string) => {
 
 export const saveMovie = async (userId: string, movieId: string, movieData: any) => {
     try {
+        // Check if already saved
+        const check = await checkIfSaved(movieId, userId);
+        if (check.isSaved) {
+            // Already saved, do not add again
+            return null;
+        }
+
         const document = await database.createDocument(
             DATABASE_ID,
             SAVED_MOVIES_COLLECTION_ID,
